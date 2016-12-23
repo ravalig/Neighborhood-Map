@@ -1,0 +1,14 @@
+.title-container {
+    background-color: black;
+    height: 60px;
+}
+
+#map {
+        height: 600px;
+      }
+
+#list {
+        background-color: black;
+        height: 600px;
+}
+
