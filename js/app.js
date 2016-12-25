@@ -41,24 +41,51 @@ placesList = [
     }
 ]
 
+var Place = function(data){
+    this.name =  ko.observable(data.name);
+    this.address = ko.observable(data.address);
+    this.center = ko.observableArray([data.center.lat, data.center.lng]);
+    // this.marker = ko.observable(data.marker);
 
-      function initMap() {
-          var map;
-          map = new google.maps.Map(document.getElementById('map'), {
-          center: placesList[2].center,
-          zoom: 3
-          });
+}
 
-          for(var i =0; i<placesList.length; i++){
-            placesList[i].marker = new google.maps.Marker({
-            position: placesList[i].center,
-            title: placesList[i].name,
-            map: map
-            });
-          }
-      }
+
 
 //-----------------------------------------------------------------------------------------------------------------
 //      VIEWMODEL
 //-----------------------------------------------------------------------------------------------------------------
+
+var ViewModel = function(map){
+
+    var self = this;
+    this.placesArray = ko.observableArray([]);
+    this.map = map;
+    placesList.forEach(function(placeItem){
+        self.placesArray.push(new Place(placeItem));
+    })
+
+    createMarkers(this.map);
+}
+
+
+function createMap() {
+    var map;
+    map = new google.maps.Map(document.getElementById('map'), {
+    center: placesList[2].center,
+    zoom: 3
+    });
+
+    ko.applyBindings( new ViewModel(map));
+
+}
+
+function createMarkers(map) {
+    for(var i =0; i<placesList.length; i++){
+        placesList[i].marker = new google.maps.Marker({
+        position: placesList[i].center,
+        title: placesList[i].name,
+        map: map
+        });
+    }
+}
 
