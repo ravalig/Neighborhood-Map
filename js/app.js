@@ -2,10 +2,10 @@
 //    MODEL
 //-----------------------------------------------------------------------------------------------------------------
 
-placesList = [
+var placesList = [
     {
         name: 'Niagara Falls',
-        address: 'New Jersey',
+        address: 'Newyork',
         center: {
                     lat: 43.092461,
                     lng: -79.047150
@@ -41,12 +41,12 @@ placesList = [
     }
 ]
 
+var infowindow;
+
 var Place = function(data){
     this.name =  ko.observable(data.name);
     this.address = ko.observable(data.address);
     this.center = ko.observableArray([data.center.lat, data.center.lng]);
-    // this.marker = ko.observable(data.marker);
-
 }
 
 
@@ -64,7 +64,53 @@ var ViewModel = function(map){
         self.placesArray.push(new Place(placeItem));
     })
 
-    createMarkers(this.map);
+
+    this.createMarkers = function() {
+        for(var i =0; i<placesList.length; i++){
+
+            placesList[i].marker = new google.maps.Marker({
+            position: placesList[i].center,
+            title: placesList[i].name
+            });
+        }
+    }
+
+    this.displayMarkers = function(map) {
+
+        for(var i =0; i<placesList.length; i++){
+            placesList[i].marker.setMap(null);
+        }
+
+        for(var i =0; i<placesList.length; i++){
+            placesList[i].marker.setMap(map);
+        }
+    }
+
+    this.displayInfoWindow = function(map){
+        for(var i =0; i<placesList.length; i++){
+            placesList[i].marker.addListener('click', (function(placesList) {
+                return function() {
+
+                    var contentString = '<h5>'+placesList.name+'</h5>'+
+                    '<h6>'+placesList.address+'</h6>';
+
+                    if(infowindow){            // Closes any previously opened infoWindow
+                        infowindow.close();
+                    }
+                    infowindow = new google.maps.InfoWindow({
+                        content: contentString
+                    });
+                    infowindow.open(map, placesList.marker);
+
+                };
+            })(placesList[i]));
+        }
+    }
+
+
+    this.createMarkers();
+    this.displayMarkers(this.map);
+    this.displayInfoWindow(this.map);
 }
 
 
@@ -79,13 +125,6 @@ function createMap() {
 
 }
 
-function createMarkers(map) {
-    for(var i =0; i<placesList.length; i++){
-        placesList[i].marker = new google.maps.Marker({
-        position: placesList[i].center,
-        title: placesList[i].name,
-        map: map
-        });
-    }
-}
+
+
 
