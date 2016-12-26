@@ -9,8 +9,7 @@ var placesList = [
         center: {
                     lat: 43.092461,
                     lng: -79.047150
-                },
-        marker: {}
+                }
     },
     {
         name: 'Honolulu',
@@ -18,8 +17,7 @@ var placesList = [
         center: {
                     lat: 21.315603,
                     lng: -157.858093
-                },
-        marker: {}
+                }
     },
     {
         name: 'Sanfrancisco',
@@ -27,8 +25,7 @@ var placesList = [
         center: {
                     lat:37.7749,
                     lng: -122.4194
-                },
-        marker: {}
+                }
     },
     {
         name: 'Yellow Stone National Park',
@@ -36,12 +33,13 @@ var placesList = [
         center: {
                     lat: 44.4280,
                     lng: -110.5885
-                },
-        marker: {}
+                }
     }
 ]
 
 var infowindow;
+var markers = [];
+var map;
 
 var Place = function(data){
     this.name =  ko.observable(data.name);
@@ -55,7 +53,20 @@ var Place = function(data){
 //      VIEWMODEL
 //-----------------------------------------------------------------------------------------------------------------
 
-var ViewModel = function(map){
+
+function createMap() {
+
+    map = new google.maps.Map(document.getElementById('map'), {
+    center: placesList[2].center,
+    zoom: 3
+    });
+
+    ko.applyBindings( new ViewModel());
+
+}
+
+
+var ViewModel = function(){
 
     var self = this;
     this.placesArray = ko.observableArray([]);
@@ -65,66 +76,41 @@ var ViewModel = function(map){
     })
 
 
-    this.createMarkers = function() {
-        for(var i =0; i<placesList.length; i++){
-
-            placesList[i].marker = new google.maps.Marker({
-            position: placesList[i].center,
-            title: placesList[i].name
-            });
+    this.createMarkers = function(places) {
+        // console.log(places[0].name());
+        markers = [];
+        for(var i=0; i<places.length; i++){
+            markers.push(new google.maps.Marker({
+                position: placesList[i].center,
+                title: placesList[i].name
+                })
+            );
         }
     }
 
-    this.displayMarkers = function(map) {
-
-        for(var i =0; i<placesList.length; i++){
-            placesList[i].marker.setMap(null);
-        }
-
-        for(var i =0; i<placesList.length; i++){
-            placesList[i].marker.setMap(map);
+    this.displayMarkers = function(markers){
+        for(var i=0; i<markers.length; i++){
+            markers[i].setMap(map);
         }
     }
 
-    this.displayInfoWindow = function(map){
-        for(var i =0; i<placesList.length; i++){
-            placesList[i].marker.addListener('click', (function(placesList) {
+    this.displayInfoWindow = function(markers){
+        for(var i=0; i<markers.length; i++){
+            markers[i].addListener('click', (function(marker){
                 return function() {
-
-                    var contentString = '<h5>'+placesList.name+'</h5>'+
-                    '<h6>'+placesList.address+'</h6>';
-
                     if(infowindow){            // Closes any previously opened infoWindow
                         infowindow.close();
                     }
                     infowindow = new google.maps.InfoWindow({
-                        content: contentString
+                        content: marker.title
                     });
-                    infowindow.open(map, placesList.marker);
-
+                    infowindow.open(map, marker);
                 };
-            })(placesList[i]));
+            })(markers[i]));
         }
     }
 
-
-    this.createMarkers();
-    this.displayMarkers(this.map);
-    this.displayInfoWindow(this.map);
+    this.createMarkers(this.placesArray());     // Initially, create markers for all locations
+    this.displayMarkers(markers);               // Displays markers on the map
+    this.displayInfoWindow(markers);            // Displays infoWindow when clicked on markers
 }
-
-
-function createMap() {
-    var map;
-    map = new google.maps.Map(document.getElementById('map'), {
-    center: placesList[2].center,
-    zoom: 3
-    });
-
-    ko.applyBindings( new ViewModel(map));
-
-}
-
-
-
-
