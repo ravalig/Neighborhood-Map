@@ -21,7 +21,7 @@
                 <input type="" name="">
                 <button>Filter</button>
                 <ul data-bind="foreach: placesArray">
-                    <li id= "placesList" data-bind="text: name">
+                    <li id= "placesList" data-bind="text: name, click: $parent.listClick">
 
                     </li>
                 </ul>

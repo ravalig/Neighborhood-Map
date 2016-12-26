@@ -76,19 +76,25 @@ var ViewModel = function(){
     })
 
 
-    this.createMarkers = function(places) {
-        // console.log(places[0].name());
+    this.createMarkers = function(places) {         // This function creates markers
+        self.clearMarkers(markers);                 // for the places passed as an argument
         markers = [];
         for(var i=0; i<places.length; i++){
             markers.push(new google.maps.Marker({
-                position: placesList[i].center,
-                title: placesList[i].name
+                position: {lat: places[i].center()[0], lng: places[i].center()[1]},
+                title: places[i].name()
                 })
             );
         }
     }
 
-    this.displayMarkers = function(markers){
+    this.clearMarkers = function(markers){      // This function clears the markers on the map
+        for(var i=0; i<markers.length; i++){
+            markers[i].setMap(null);
+        }
+    }
+
+    this.displayMarkers = function(markers){    // This function displays markers on the map
         for(var i=0; i<markers.length; i++){
             markers[i].setMap(map);
         }
@@ -113,4 +119,11 @@ var ViewModel = function(){
     this.createMarkers(this.placesArray());     // Initially, create markers for all locations
     this.displayMarkers(markers);               // Displays markers on the map
     this.displayInfoWindow(markers);            // Displays infoWindow when clicked on markers
+
+    this.listClick = function(clickedItem){
+        self.clearMarkers(markers);
+        self.createMarkers([clickedItem]);
+        self.displayMarkers(markers);
+        self.displayInfoWindow(markers);
+    }
 }
