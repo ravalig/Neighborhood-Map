@@ -69,7 +69,11 @@ function createMap() {
 var ViewModel = function(){
 
     var self = this;
+    this.showList = ko.observable(true);
+    this.showFilteredList = ko.observable(false);
+    this.query = ko.observable('');
     this.placesArray = ko.observableArray([]);
+    this.filteredPlaces = ko.observableArray([]);
     this.map = map;
     placesList.forEach(function(placeItem){
         self.placesArray.push(new Place(placeItem));
@@ -116,6 +120,13 @@ var ViewModel = function(){
         }
     }
 
+    this.openInfoWindow = function(map, markers){
+        infowindow = new google.maps.InfoWindow({
+                        content: markers[0].title
+                    });
+        infowindow.open(map, markers[0]);
+    }
+
     this.createMarkers(this.placesArray());     // Initially, create markers for all locations
     this.displayMarkers(markers);               // Displays markers on the map
     this.displayInfoWindow(markers);            // Displays infoWindow when clicked on markers
@@ -125,5 +136,17 @@ var ViewModel = function(){
         self.createMarkers([clickedItem]);
         self.displayMarkers(markers);
         self.displayInfoWindow(markers);
+        self.openInfoWindow(map, markers);
+    }
+
+    this.filterQuery = function(){
+        self.filteredPlaces.removeAll();
+        for( var i=0; i<self.placesArray().length; i++){
+            if(self.placesArray()[i].name().toLowerCase().indexOf(self.query()) > -1){
+                self.filteredPlaces.push(self.placesArray()[i]);
+            }
+        }
+        self.showList(false);
+        self.showFilteredList(true);
     }
 }

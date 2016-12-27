@@ -18,18 +18,24 @@
         </div>
         <div class="row">
             <div class="col-md-3" id="list">
-                <input type="" name="">
-                <button>Filter</button>
-                <ul data-bind="foreach: placesArray">
+                <form data-bind= "submit: filterQuery">
+                    <input placeholder="Search for location" data-bind="textInput: query">
+                    <button type="submit">Filter</button>
+                </form>
+
+                <ul data-bind="foreach: placesArray, visible: showList">
+                    <li id= "placesList" data-bind="text: name, click: $parent.listClick">
+
+                    </li>
+                </ul>
+
+                <ul data-bind="foreach: filteredPlaces, visible: showFilteredList">
                     <li id= "placesList" data-bind="text: name, click: $parent.listClick">
 
                     </li>
                 </ul>
             </div>
-
-            <div class="col-md-9" id="map">
-
-            </div>
+            <div class="col-md-9" id="map"></div>
         </div>
     </div>
 
