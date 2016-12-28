@@ -19,20 +19,20 @@ var Place = function(data){
 
 function createMap() {
 
-    var plano = {
-                lat:33.019844,
-                lng:-96.698883
+    var whiteHouse = {
+                lat:38.8976763,
+                lng:-77.0365298
             };
 
     map = new google.maps.Map(document.getElementById('map'), {
-    center: plano,
+    center: whiteHouse,
     zoom: 15
     });
 
     var request = {
-                location: plano,
+                location: whiteHouse,
                 radius: '1000',
-                types: ['restaurant']
+                types: ['park']
               };
 
     service = new google.maps.places.PlacesService(map);
