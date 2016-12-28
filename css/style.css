@@ -2,27 +2,34 @@ ul {
   list-style-type: none;
 }
 
-.title-container {
+body {
     background-color: black;
-    height: 60px;
+}
+
+.title-container {
+    height: 80px;
+    color: white;
 }
 
 #map {
-        height: 600px;
+        height: 575px;
       }
 
 #list {
-        background-color: black;
-        height: 600px;
+        height: 575px;
 }
 
 #placesList {
     color: white;
-    margin-top: 20px;
+    margin-top: 15px;
 }
 
 .error {
     color:red;
     font-size:200%;
+}
+
+.yelp {
+    height: 200px;
 }
 

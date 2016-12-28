@@ -1,67 +1,52 @@
 //-----------------------------------------------------------------------------------------------------------------
 //    MODEL
 //-----------------------------------------------------------------------------------------------------------------
-
-var placesList = [
-    {
-        name: 'Niagara Falls',
-        address: 'Newyork',
-        center: {
-                    lat: 43.092461,
-                    lng: -79.047150
-                }
-    },
-    {
-        name: 'Honolulu',
-        address: 'Hawaii',
-        center: {
-                    lat: 21.315603,
-                    lng: -157.858093
-                }
-    },
-    {
-        name: 'Sanfrancisco',
-        address: 'California',
-        center: {
-                    lat:37.7749,
-                    lng: -122.4194
-                }
-    },
-    {
-        name: 'Yellow Stone National Park',
-        address: 'Wyoming',
-        center: {
-                    lat: 44.4280,
-                    lng: -110.5885
-                }
-    }
-]
-
-var infowindow;
+var placesList =[];
 var markers = [];
 var map;
+var service;
+var infowindow;
 
 var Place = function(data){
     this.name =  ko.observable(data.name);
-    this.address = ko.observable(data.address);
-    this.center = ko.observableArray([data.center.lat, data.center.lng]);
+    this.place_id = ko.observable(data.place_id);
+    this.center = ko.observableArray([data.geometry.location.lat(), data.geometry.location.lng()]);
 }
-
-
 
 //-----------------------------------------------------------------------------------------------------------------
 //      VIEWMODEL
 //-----------------------------------------------------------------------------------------------------------------
 
-
 function createMap() {
 
+    var plano = {
+                lat:33.019844,
+                lng:-96.698883
+            };
+
     map = new google.maps.Map(document.getElementById('map'), {
-    center: placesList[2].center,
-    zoom: 3
+    center: plano,
+    zoom: 15
     });
 
-    ko.applyBindings( new ViewModel());
+    var request = {
+                location: plano,
+                radius: '1000',
+                types: ['restaurant']
+              };
+
+    service = new google.maps.places.PlacesService(map);
+    service.nearbySearch(request, callback);
+
+    function callback(results, status) {
+        if (status == google.maps.places.PlacesServiceStatus.OK) {
+            for(var i=0; i<results.length; i++){
+                // console.log(placesList[i].geometry.location);
+                placesList[i] = results[i];
+            }
+        ko.applyBindings( new ViewModel());
+        }
+    }
 
 }
 
