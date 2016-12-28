@@ -65,6 +65,11 @@ function createMap() {
 
 }
 
+function googleError() {
+    $(".error").text("There is an error loading Google Maps!!");
+    return;
+}
+
 
 var ViewModel = function(){
 
@@ -104,7 +109,7 @@ var ViewModel = function(){
         }
     }
 
-    this.displayInfoWindow = function(markers){
+    this.onClickMarker = function(markers){
         for(var i=0; i<markers.length; i++){
             markers[i].addListener('click', (function(marker){
                 return function() {
@@ -114,6 +119,13 @@ var ViewModel = function(){
                     infowindow = new google.maps.InfoWindow({
                         content: marker.title
                     });
+
+                    if (marker.getAnimation() == null) {
+                        marker.setAnimation(google.maps.Animation.BOUNCE);
+                    }
+                    else {
+                        marker.setAnimation(null);
+                    }
                     infowindow.open(map, marker);
                 };
             })(markers[i]));
@@ -129,13 +141,13 @@ var ViewModel = function(){
 
     this.createMarkers(this.placesArray());     // Initially, create markers for all locations
     this.displayMarkers(markers);               // Displays markers on the map
-    this.displayInfoWindow(markers);            // Displays infoWindow when clicked on markers
+    this.onClickMarker(markers);            // Displays infoWindow when clicked on markers
 
     this.listClick = function(clickedItem){
         self.clearMarkers(markers);
         self.createMarkers([clickedItem]);
         self.displayMarkers(markers);
-        self.displayInfoWindow(markers);
+        self.onClickMarker(markers);
         self.openInfoWindow(map, markers);
     }
 
@@ -148,5 +160,9 @@ var ViewModel = function(){
         }
         self.showList(false);
         self.showFilteredList(true);
+        self.clearMarkers(markers);
+        self.createMarkers(self.filteredPlaces());
+        self.displayMarkers(markers);
+        self.onClickMarker(markers);
     }
 }
