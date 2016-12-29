@@ -19,20 +19,20 @@ var Place = function(data){
 
 function createMap() {
 
-    var whiteHouse = {
-                lat:38.8976763,
-                lng:-77.0365298
+    var NewYork = {
+                lat: 40.758896,
+                lng:-73.985130
             };
 
     map = new google.maps.Map(document.getElementById('map'), {
-    center: whiteHouse,
+    center: NewYork,
     zoom: 15
     });
 
     var request = {
-                location: whiteHouse,
+                location: NewYork,
                 radius: '1000',
-                types: ['park']
+                types: ['restaurant']
               };
 
     service = new google.maps.places.PlacesService(map);
@@ -41,7 +41,6 @@ function createMap() {
     function callback(results, status) {
         if (status == google.maps.places.PlacesServiceStatus.OK) {
             for(var i=0; i<results.length; i++){
-                // console.log(placesList[i].geometry.location);
                 placesList[i] = results[i];
             }
         ko.applyBindings( new ViewModel());
@@ -61,57 +60,65 @@ var ViewModel = function(){
     var self = this;
     this.showList = ko.observable(true);
     this.showFilteredList = ko.observable(false);
+    this.showYelp = ko.observable(false);
     this.query = ko.observable('');
     this.placesArray = ko.observableArray([]);
     this.filteredPlaces = ko.observableArray([]);
+    this.yelpContent = ko.observable('');
     this.map = map;
-    placesList.forEach(function(placeItem){
-        self.placesArray.push(new Place(placeItem));
-    })
+
+
+    // placesList.forEach(function(placeItem){
+    //     self.placesArray.push(new Place(placeItem));
+    // })
+
+    for(var i=0; i<10; i++){
+        self.placesArray.push(new Place(placesList[i]));
+    }
 
 
     this.createMarkers = function(places) {         // This function creates markers
         self.clearMarkers(markers);                 // for the places passed as an argument
         markers = [];
         for(var i=0; i<places.length; i++){
-            markers.push(new google.maps.Marker({
-                position: {lat: places[i].center()[0], lng: places[i].center()[1]},
-                title: places[i].name()
-                })
-            );
+            var mark = {
+                value:new google.maps.Marker({position: {lat: places[i].center()[0], lng: places[i].center()[1]},title: places[i].name()}),
+                place_id:places[i].place_id()
+            };
+            markers.push(mark);
         }
     }
 
     this.clearMarkers = function(markers){      // This function clears the markers on the map
         for(var i=0; i<markers.length; i++){
-            markers[i].setMap(null);
+            markers[i].value.setMap(null);
         }
     }
 
     this.displayMarkers = function(markers){    // This function displays markers on the map
         for(var i=0; i<markers.length; i++){
-            markers[i].setMap(map);
+            markers[i].value.setMap(map);
         }
     }
 
     this.onClickMarker = function(markers){
         for(var i=0; i<markers.length; i++){
-            markers[i].addListener('click', (function(marker){
+            markers[i].value.addListener('click', (function(marker){
                 return function() {
-                    if(infowindow){            // Closes any previously opened infoWindow
-                        infowindow.close();
-                    }
+                    // if(infowindow){            // Closes any previously opened infoWindow
+                    //     infowindow.close();
+                    // }
                     infowindow = new google.maps.InfoWindow({
-                        content: marker.title
+                        content: marker.value.title
                     });
 
-                    if (marker.getAnimation() == null) {
-                        marker.setAnimation(google.maps.Animation.BOUNCE);
+                    if (marker.value.getAnimation() == null) {
+                        marker.value.setAnimation(google.maps.Animation.BOUNCE);
                     }
                     else {
-                        marker.setAnimation(null);
+                        marker.value.setAnimation(null);
                     }
-                    infowindow.open(map, marker);
+                    infowindow.open(map, marker.value);
                 };
             })(markers[i]));
         }
@@ -119,14 +126,72 @@ var ViewModel = function(){
 
     this.openInfoWindow = function(map, markers){
         infowindow = new google.maps.InfoWindow({
-                        content: markers[0].title
+                        content: markers[0].value.title
                     });
-        infowindow.open(map, markers[0]);
+        infowindow.open(map, markers[0].value);
     }
 
     this.createMarkers(this.placesArray());     // Initially, create markers for all locations
     this.displayMarkers(markers);               // Displays markers on the map
     this.onClickMarker(markers);            // Displays infoWindow when clicked on markers
+
+    this.displayYelpDetails = function(clickedItem){
+        function nonceGenerate() {
+                return (Math.floor(Math.random() * 1e12).toString());
+            }
+
+        var yelpUrl = 'https://api.yelp.com/v2/search/?term='+
+                        clickedItem.name();
+
+        var YELP_KEY = 'jdNHl27QxX5TBIk5SeBOCg',
+            YELP_TOKEN = 'ujhYkF8kbD1xqi0zleUgNMfWdGUp_qyx',
+            KEY_SECRET ='nnhSjaynt9XZFWYmxiUKZg6sV4M',
+            TOKEN_SECRET = 'UyI4vI1POKV4LeAdiSAtPP9V5O8';
+
+        var parameters = {
+                oauth_consumer_key: YELP_KEY,
+                oauth_token: YELP_TOKEN,
+                oauth_nonce: nonceGenerate(),
+                oauth_timestamp: Math.floor(Date.now()/1000),
+                oauth_signature_method: 'HMAC-SHA1',
+                oauth_version: '1.0',
+                callback: 'cb',
+                term: 'restaurants',
+                location: 'newyork',
+                limit:1
+        };
+
+        var encodedSignature = oauthSignature.generate('GET',yelpUrl, parameters, KEY_SECRET, TOKEN_SECRET);
+        parameters.oauth_signature = encodedSignature;
+
+        var settings = {
+        url: yelpUrl,
+        data: parameters,
+        cache: true,                // This is crucial to include as well to prevent jQuery from adding on a cache-buster parameter "_=23489489749837", invalidating our oauth-signature
+        dataType: 'jsonp',
+        jsonpCallback: 'cb',
+        success: function(results) {
+                    self.showYelp(true);
+                    $('.yelp').text("");
+                    console.log(results.businesses[0].review_count);
+                    var temp;
+                    temp =  '<h4>'+results.businesses[0].name+'</h4>'+
+                            '<div>'+
+                                '<img '+'src='+results.businesses[0].rating_img_url+'>'+'<br>'+
+                                'Phone:  ' + results.businesses[0].display_phone+'<br>'+
+                                 results.businesses[0].location.display_address+'<br>'+
+                                '</div>'+
+                            '<img class="yelpImg" src="img/yelp.png">';
+                    $('.yelp').append(temp);
+                },
+        error: function(error) {
+                    $(".error").text(error);
+                    return;
+                }
+        };
+        $.ajax(settings);
+    }
+
 
     this.listClick = function(clickedItem){
         self.clearMarkers(markers);
@@ -134,6 +199,7 @@ var ViewModel = function(){
         self.displayMarkers(markers);
         self.onClickMarker(markers);
         self.openInfoWindow(map, markers);
+        self.displayYelpDetails(clickedItem);
     }
 
     this.filterQuery = function(){

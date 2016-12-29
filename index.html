@@ -46,8 +46,7 @@
         </div>
 
         <div class="row">
-            <div class="col-md-12 yelp">
-
+            <div class="col-md-12 yelp text-center" data-bind="visible: showYelp, text: yelpContent">
             </div>
         </div>
 
@@ -56,6 +55,7 @@
     <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.2.4.min.js"></script>
     <script type="text/javascript" src="js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.1/knockout-min.js"></script>
+    <script src="js/oauth-signature.min.js"></script>
     <script type="text/javascript" src="js/app.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBmswV1CBqPFmMKlixYPVZ6cbDSqiPPwDM&libraries=places&callback=createMap"
     onError="googleError()" async defer></script>
