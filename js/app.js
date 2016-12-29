@@ -14,17 +14,19 @@ var Place = function(data){
                                       data.geometry.location.lng()]);
 }
 
+this.error = ko.observable('');
+
 //-----------------------------------------------------------------------------------------------------------------
 //      VIEWMODEL
 //-----------------------------------------------------------------------------------------------------------------
 
 function createMap() {
 
-/*
-    This function creates the Map with center at new york and
-    loads the restaurants data from google places .
-    This function invokes the ViewModel.
-*/
+    /*
+        This function creates the Map with center at new york and
+        loads the restaurants data from google places .
+        This function invokes the ViewModel.
+    */
     var NewYork = {
                 lat: 40.758896,
                 lng:-73.985130
@@ -36,7 +38,6 @@ function createMap() {
     });
 
     google.maps.event.addDomListener(window, 'resize', function(){
-        // your code here
         map.setCenter(NewYork);
         map.setZoom(13);
     });
@@ -58,12 +59,15 @@ function createMap() {
             }
         ko.applyBindings( new ViewModel());
         }
+        else {
+            $(".error").text("There is an error loading Google Places!!");
+        }
     }
 
 }
 
 function googleError() {
-    $(".error").text("There is an error loading Google Maps!!");
+    this.error("There is an error loading Google Maps!!");
     return;
 }
 
@@ -103,9 +107,9 @@ var ViewModel = function(){
     }
 
     this.clearMarkers = function(markers){
-    /*
-        This function clears the markers on the map
-    */
+        /*
+            This function clears the markers on the map
+        */
         for(var i=0; i<markers.length; i++){
             markers[i].value.setMap(null);
         }
@@ -135,12 +139,15 @@ var ViewModel = function(){
                         content: marker.value.title
                     });
 
-                    if (marker.value.getAnimation() == null) {
-                        marker.value.setAnimation(google.maps.Animation.BOUNCE);
-                    }
-                    else {
-                        marker.value.setAnimation(null);
-                    }
+                    // if (marker.value.getAnimation() == null) {
+                    //     marker.value.setAnimation(google.maps.Animation.BOUNCE);
+                    // }
+                    // else {
+                    //     marker.value.setAnimation(null);
+                    // }
+
+                    marker.value.setAnimation(google.maps.Animation.BOUNCE);
+
                     infowindow.open(map, marker.value);
                 };
             })(markers[i]));
@@ -152,6 +159,12 @@ var ViewModel = function(){
                         content: markers[0].value.title
                     });
         infowindow.open(map, markers[0].value);
+        if (markers[0].value.getAnimation() == null) {
+            markers[0].value.setAnimation(google.maps.Animation.BOUNCE);
+        }
+        else {
+            markers[0].value.setAnimation(null);
+        }
     }
 
     this.createMarkers(this.placesArray());     // Initially, create markers for all locations
@@ -212,8 +225,7 @@ var ViewModel = function(){
                     $('.yelp').append(temp);
                 },
         error: function(error) {
-                    $(".error").text(error);
-                    return;
+                    this.error("There is an error loading yelp data");
                 }
         };
         $.ajax(settings);
