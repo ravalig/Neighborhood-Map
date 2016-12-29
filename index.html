@@ -23,6 +23,12 @@
             </div>
         </div>
 
+
+        <div class="row">
+            <div class="col-md-12 yelp text-center" data-bind="visible: showYelp, text: yelpContent">
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-md-3" id="list">
                 <form data-bind= "submit: filterQuery">
@@ -43,11 +49,6 @@
                 </ul>
             </div>
             <div class="col-md-9" id="map"></div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-12 yelp text-center" data-bind="visible: showYelp, text: yelpContent">
-            </div>
         </div>
 
     </div>
