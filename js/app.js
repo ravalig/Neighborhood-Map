@@ -10,7 +10,8 @@ var infowindow;
 var Place = function(data){
     this.name =  ko.observable(data.name);
     this.place_id = ko.observable(data.place_id);
-    this.center = ko.observableArray([data.geometry.location.lat(), data.geometry.location.lng()]);
+    this.center = ko.observableArray([data.geometry.location.lat(),
+                                      data.geometry.location.lng()]);
 }
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -19,6 +20,11 @@ var Place = function(data){
 
 function createMap() {
 
+/*
+    This function creates the Map with center at new york and
+    loads the restaurants data from google places .
+    This function invokes the ViewModel.
+*/
     var NewYork = {
                 lat: 40.758896,
                 lng:-73.985130
@@ -28,6 +34,13 @@ function createMap() {
     center: NewYork,
     zoom: 15
     });
+
+    google.maps.event.addDomListener(window, 'resize', function(){
+        // your code here
+        map.setCenter(NewYork);
+        map.setZoom(13);
+    });
+
 
     var request = {
                 location: NewYork,
@@ -67,47 +80,57 @@ var ViewModel = function(){
     this.yelpContent = ko.observable('');
     this.map = map;
 
-
-    // placesList.forEach(function(placeItem){
-    //     self.placesArray.push(new Place(placeItem));
-    // })
-
     for(var i=0; i<10; i++){
         self.placesArray.push(new Place(placesList[i]));
     }
 
 
-    this.createMarkers = function(places) {         // This function creates markers
-        self.clearMarkers(markers);                 // for the places passed as an argument
+    this.createMarkers = function(places) {
+        /*
+            This function creates markers for the places passed as an argument
+        */
+        self.clearMarkers(markers);
         markers = [];
         for(var i=0; i<places.length; i++){
-            var mark = {
-                value:new google.maps.Marker({position: {lat: places[i].center()[0], lng: places[i].center()[1]},title: places[i].name()}),
+            var mark = {value:  new google.maps.Marker({
+                                    position: {lat: places[i].center()[0],
+                                    lng: places[i].center()[1]},
+                                    title: places[i].name()}),
                 place_id:places[i].place_id()
             };
             markers.push(mark);
         }
     }
 
-    this.clearMarkers = function(markers){      // This function clears the markers on the map
+    this.clearMarkers = function(markers){
+    /*
+        This function clears the markers on the map
+    */
         for(var i=0; i<markers.length; i++){
             markers[i].value.setMap(null);
         }
     }
 
-    this.displayMarkers = function(markers){    // This function displays markers on the map
+    this.displayMarkers = function(markers){
+    /*
+        This function displays markers on the map
+    */
         for(var i=0; i<markers.length; i++){
             markers[i].value.setMap(map);
         }
     }
 
     this.onClickMarker = function(markers){
+    /*
+        When clicked on a marker, this function opens the infowindow
+        and animates the marker
+    */
         for(var i=0; i<markers.length; i++){
             markers[i].value.addListener('click', (function(marker){
                 return function() {
-                    // if(infowindow){            // Closes any previously opened infoWindow
-                    //     infowindow.close();
-                    // }
+                    if(infowindow){
+                        infowindow.close(); //Closes any previously opened infoWindow
+                    }
                     infowindow = new google.maps.InfoWindow({
                         content: marker.value.title
                     });
@@ -136,6 +159,10 @@ var ViewModel = function(){
     this.onClickMarker(markers);            // Displays infoWindow when clicked on markers
 
     this.displayYelpDetails = function(clickedItem){
+    /*
+        When clicked on a list item, this function
+        displays the details of the location taken from yelp
+    */
         function nonceGenerate() {
                 return (Math.floor(Math.random() * 1e12).toString());
             }
@@ -167,9 +194,9 @@ var ViewModel = function(){
         var settings = {
         url: yelpUrl,
         data: parameters,
-        cache: true,                // This is crucial to include as well to prevent jQuery from adding on a cache-buster parameter "_=23489489749837", invalidating our oauth-signature
-        dataType: 'jsonp',
-        jsonpCallback: 'cb',
+        cache: true,                // This is crucial to include as well to prevent jQuery
+        dataType: 'jsonp',          //from adding on a cache-buster parameter "_=23489489749837",
+        jsonpCallback: 'cb',        //invalidating our oauth-signature
         success: function(results) {
                     self.showYelp(true);
                     $('.yelp').text("");
@@ -194,6 +221,14 @@ var ViewModel = function(){
 
 
     this.listClick = function(clickedItem){
+    /*
+        When clicked on a list item, this function does the following:
+            - Clears previous markers on the map
+            - Creates a marker for the list item
+            - Displays the marker on the map
+            - Opens the info window and animates the marker
+            - Displays the yelp details asociated for that location
+    */
         self.clearMarkers(markers);
         self.createMarkers([clickedItem]);
         self.displayMarkers(markers);
@@ -203,6 +238,15 @@ var ViewModel = function(){
     }
 
     this.filterQuery = function(){
+    /*
+        When user inputs value to filter, this function does the following:
+            - Displays the location items that contains the entered input
+            - clears previous markers on the map
+            - creates markers  for the filtered items
+            - displays markers on the map
+            - Opens the info window
+            - When clicked on the marker animates the marker
+    */
         self.filteredPlaces.removeAll();
         for( var i=0; i<self.placesArray().length; i++){
             if(self.placesArray()[i].name().toLowerCase().indexOf(self.query()) > -1){
