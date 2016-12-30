@@ -11,53 +11,66 @@
 <body>
 
     <div class="container">
-        <div class="row">
-            <div class="col-md-12 title-container text-center">
-                <h1>Neighborhood Map</h1>
+        <header>
+            <div class="row">
+                <div class="col-md-12 title-container text-center">
+                    <h1>Neighborhood Map</h1>
+                </div>
             </div>
-        </div>
+
+            <div class="row">
+                <div class="col-md-12 error" data-bind="text: error">
+
+                </div>
+            </div>
+        </header>
+
+        <article>
+            <div class="row">
+                <div class="col-md-12 yelp text-center" data-bind="visible: showYelp">
+                    <h3 data-bind="text: restaurant"></h3>
+                    <img data-bind="attr: { src: url}">
+                    <h4 data-bind="text: phone"></h4>
+                    <h4 data-bind="text: address"></h4>
+                    <img class="yelpImg" src="img/yelp.png">
+                </div>
+            </div>
+        </article>
 
         <div class="row">
-            <div class="col-md-12 error" data-bind="text: error">
+            <aside>
+                <div class="col-md-3" id="list">
+                    <form data-bind= "submit: filterQuery">
+                        <input placeholder="Search for location" data-bind="textInput: query">
+                        <button type="submit">Filter</button>
+                    </form>
 
-            </div>
-        </div>
+                    <ul data-bind="foreach: locations, visible: showList">
+                        <li id= "placesList" data-bind="text: name, click: $parent.listClick">
 
+                        </li>
+                    </ul>
 
-        <div class="row">
-            <div class="col-md-12 yelp text-center" data-bind="visible: showYelp, text: yelpContent">
-            </div>
-        </div>
+                    <ul data-bind="foreach: filteredPlaces, visible: showFilteredList">
+                        <li id= "placesList" data-bind="text: name, click: $parent.listClick">
 
-        <div class="row">
-            <div class="col-md-3" id="list">
-                <form data-bind= "submit: filterQuery">
-                    <input placeholder="Search for location" data-bind="textInput: query">
-                    <button type="submit">Filter</button>
-                </form>
+                        </li>
+                    </ul>
+                </div>
+            </aside>
 
-                <ul data-bind="foreach: placesArray, visible: showList">
-                    <li id= "placesList" data-bind="text: name, click: $parent.listClick">
-
-                    </li>
-                </ul>
-
-                <ul data-bind="foreach: filteredPlaces, visible: showFilteredList">
-                    <li id= "placesList" data-bind="text: name, click: $parent.listClick">
-
-                    </li>
-                </ul>
-            </div>
-            <div class="col-md-9" id="map"></div>
+            <article>
+                <div class="col-md-9" id="map"></div>
+            </article>
         </div>
 
     </div>
 
-    <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.2.4.min.js"></script>
-    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.2.4.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.1/knockout-min.js"></script>
     <script src="js/oauth-signature.min.js"></script>
-    <script type="text/javascript" src="js/app.js"></script>
+    <script src="js/app.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBmswV1CBqPFmMKlixYPVZ6cbDSqiPPwDM&libraries=places&callback=createMap"
     onError="googleError()" async defer></script>
 
